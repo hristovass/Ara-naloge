@@ -1,0 +1,93 @@
+
+#include <string>
+#include <sstream>
+#include <fstream>
+using namespace std;
+
+ofstream out;
+
+string inputText(const string& pot) {
+	ifstream input(pot);
+	stringstream sstream;
+
+	if (!input.is_open()) {
+		return string();
+	}
+
+	sstream << input.rdbuf();
+	return sstream.str();
+}
+
+void izpis_KMPnext(const int* polje, int len) {
+	for (int i = 0; i < len; ++i) {
+		out << polje[i] << ' ';
+	}
+	out << endl;
+}
+
+int* kmpNextTabele(string vzorec)
+{
+	int i = 0;
+	int j = -1;
+	int m = vzorec.length() + 1;
+	int* kmpNext = new int[m]; // -1 0 0 0 1...
+	kmpNext[0] = j;
+	while (i < m - 1) {
+		while (j >= 0 && vzorec[i] != vzorec[j]) {
+			j = kmpNext[j];
+		}
+		i++;
+		j++;
+		kmpNext[i] = j;
+	}
+	return kmpNext;
+}
+
+void KMP(const string& y, const string& x) {  //vzorec pattern
+	/*
+	 * implementacija algoritma KMP
+	 * za izpis polja KMPnext lahko uporabite funkcijo izpis_KMPnext
+	 * Za izpis navidezne spremenljivke index uporabite: out << index << ' ';
+	 */
+	 // y = tekst x = pattern
+	unsigned long long i = 0, j = 0;
+	//unsigned long long j = 0;
+	int m = x.length();
+	unsigned long long n = y.length();
+
+	int* kmpNext = kmpNextTabele(x);
+	izpis_KMPnext(kmpNext, m);
+
+	while (j < n) {
+		if (x[i] != y[j + i]) {
+			i = 0;
+			j += i - kmpNext[i];
+		}
+		if (j == n)
+			break;
+		if (x[i] == y[j + i])
+			i++;
+		if (i == m) {
+			i = 0;
+			out << j << " ";
+			j += m;
+		}
+	}
+}
+
+int main(int argc, const char* const argv[]) {
+	if (argc != 3) {
+		return -1;
+	}
+
+	string text = inputText(argv[2]);
+	string vzorec = argv[1];
+	out.open("out.txt");
+
+	if (!out) {
+		return -2;
+	}
+
+	KMP(text, vzorec);
+	return 0;
+}
